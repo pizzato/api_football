@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "api_football"
+version = "0.1"
+description = "An easy python interface for api-football for data science projects"
+authors = ["Luiz Pizzato"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.26.0"
+requests-cache = "^0.7.4"
+pandas = "^1.3.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
