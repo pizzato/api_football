@@ -6,7 +6,7 @@ authors = ["Luiz Pizzato"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.7"
 requests = "^2.26.0"
 requests-cache = "^0.7.4"
 pandas = "^1.3.2"
