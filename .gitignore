@@ -3,3 +3,4 @@
 *_secret.py
 /data/
 *.sqlite
+.idea
