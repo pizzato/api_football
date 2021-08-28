@@ -35,7 +35,7 @@ def fetch_and_dump():
         json.dump({'current_round':current_round}, f, ensure_ascii=False, indent=4)
 
     print("Getting Fixtures")
-    round_fixtures_df = api.fixtures(league=LEAGUE, season=SEASON, round=current_round)
+    round_fixtures_df = api.fixtures(league=LEAGUE, season=SEASON, season_round=current_round)
     round_fixtures_df.to_csv(FOLDER + 'round_fixtures_' + file_append_str + '.csv')
     round_fixtures_df.to_pickle(FOLDER + 'round_fixtures_' + file_append_str + '.pkl')
 

@@ -14,7 +14,7 @@ _EP_ODDS = "v3/odds"
 
 class APIFootballBase:
 
-    def __init__(self, key, host="api-football-v1.p.rapidapi.com", convert_to_pandas=True):
+    def __init__(self, key, host="api-football-v1.p.rapidapi.com", convert_to_pandas=True, league=None, season=None):
         requests_cache.install_cache("APIFootball", backend='sqlite', expire_after=-1,
                                      urls_expire_after={
                                          "*/" + _EP_SQUADS: -1
@@ -33,6 +33,9 @@ class APIFootballBase:
         }
 
         self.convert_to_pandas = convert_to_pandas
+        self.league = league
+        self.season = season
+
 
     def _api_call(self, params, url, just_response=False):
         response = requests.request("GET", url=url, headers=self.headers, params=params).json()
@@ -51,7 +54,10 @@ class APIFootballBase:
 
         return result
 
-    def teams(self, league, season):
+    def teams(self, league=None, season=None):
+        league = league if league is not None else self.league
+        season = season if season is not None else self.season
+
         params = dict(league=league, season=season)
         url = self.host + _EP_TEAMS
         return self._api_call(params=params, url=url)
@@ -73,8 +79,12 @@ class APIFootballBase:
 
         return players
 
-    def round(self, league, season, current):
-        current = "true" if current == True else False
+    def round(self, league=None, season=None, current="false"):
+        league = league if league is not None else self.league
+        season = season if season is not None else self.season
+
+        current = "true" if current is True else "false"
+
         params = dict(league=league, season=season, current=current)
         url = self.host + _EP_ROUNDS
         response = self._api_call(params=params, url=url, just_response=True)
@@ -84,8 +94,13 @@ class APIFootballBase:
             rounds = pd.DataFrame({'rounds': rounds})
         return rounds
 
-    def fixtures(self, league, season, round):
-        params = dict(league=league, season=season, round=round)
+    def fixtures(self, league=None, season=None, season_round=None):
+        league = league if league is not None else self.league
+        season = season if season is not None else self.season
+        params = dict(league=league, season=season)
+        if season_round is not None:
+            params.update(dict(round = season_round))
+
         url = self.host + _EP_FIXTURES
         return self._api_call(params=params, url=url)
 
@@ -123,3 +138,4 @@ class APIFootballBase:
 
         result = {b: {v: np.mean(lo) for v, lo in dv.items()} for b, dv in d_bid_value.items()}
         return result
+
