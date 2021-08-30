@@ -21,8 +21,8 @@ class APIFootballBase:
                                          , "*/" + _EP_TEAMS: -1
                                          , "*/" + _EP_ROUNDS: 86400  # 1 day
                                          , "*/" + _EP_FIXTURES: 86400  # 1 day
-                                         , "*/" + _EP_PREDICTIONS: 3600  # 1 hour
-                                         , "*/" + _EP_ODDS: 3600  # 1 hour
+                                         , "*/" + _EP_PREDICTIONS: 86400  # 1 day
+                                         , "*/" + _EP_ODDS: 86400  # 1 day
                                      }
                                      )
 
