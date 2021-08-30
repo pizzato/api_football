@@ -13,7 +13,7 @@ def flatten(d):
         if isinstance(val, list):
             for subdict in val:
                 deeper = flatten(subdict).items()
-                out.update({key + '_' + key2: val2 for key2, val2 in deeper})
+                out.update({'{}_{}'.format(key, key2): val2 for key2, val2 in deeper})
         else:
             out[key] = val
     return out
