@@ -38,12 +38,21 @@ class APIFootballBase:
 
 
     def _api_call(self, params, url, just_response=False):
-        response = requests.request("GET", url=url, headers=self.headers, params=params).json()
+        response = []
+        while True:
+            json_response = requests.request("GET", url=url, headers=self.headers, params=params).json()
 
-        if not response['results']:
-            print("Warning: ", response['errors'])
-            return None
-        response = response['response']
+            if not json_response['results']:
+                print("Warning: ", json_response['errors'])
+                return None
+
+            response += json_response['response']
+
+            pages = json_response.get('paging', {'current': 1, 'total': 1})
+
+            if pages['current'] == pages['total']:
+                break
+            params.update({'page':pages['current']+1})
 
         if just_response:
             return response
@@ -109,8 +118,13 @@ class APIFootballBase:
         url = self.host + _EP_PREDICTIONS
         return self._api_call(params=params, url=url)
 
-    def odds(self, fixture, bookmaker=None, bet=None):
-        params = dict(fixture=fixture)
+    def odds(self, league=None, season=None, fixture=None, bookmaker=None, bet=None):
+        league = league if league is not None else self.league
+        season = season if season is not None else self.season
+        params = dict(league=league, season=season)
+
+        if fixture is not None:
+            params.update(dict(fixture=fixture))
         if bookmaker is not None:
             params.update(dict(bookmaker=bookmaker))
         if bet is not None:
@@ -122,20 +136,30 @@ class APIFootballBase:
         if response is None:
             return None
 
-        d_bid_value = {}
-        for bookmaker in response[0]['bookmakers']:
-            for bets in bookmaker['bets']:
-                bid = bets['id'], bets['name']
-                if bid not in d_bid_value:
-                    d_bid_value[bid] = {}
+        results = []
+        for fixture_odds in response:
+            fixture_id = fixture_odds['fixture']['id']
 
-                for ov in bets['values']:
-                    value, odd = ov['value'], ov['odd']
-                    if value not in d_bid_value[bid]:
-                        d_bid_value[bid][value] = []
+            d_bid_value = {}
+            for bookmaker in fixture_odds['bookmakers']:
+                for bets in bookmaker['bets']:
+                    # bid = bets['id'], bets['name']
+                    bid = bets['name']
+                    if bid not in d_bid_value:
+                        d_bid_value[bid] = {}
 
-                    d_bid_value[bid][value] += [1. / float(odd)]
+                    for ov in bets['values']:
+                        value, odd = ov['value'], ov['odd']
+                        if value not in d_bid_value[bid]:
+                            d_bid_value[bid][value] = []
 
-        result = {b: {v: np.mean(lo) for v, lo in dv.items()} for b, dv in d_bid_value.items()}
-        return result
+                        d_bid_value[bid][value] += [1. / float(odd)]
+
+            result = dict(fixture_id=fixture_id)
+            result.update({b: {v: np.mean(lo) for v, lo in dv.items()} for b, dv in d_bid_value.items()})
+            results.append(result)
+
+        if self.convert_to_pandas:
+            results = pd.DataFrame([flatten(r) for r in results])
+        return results
 
