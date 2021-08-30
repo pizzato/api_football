@@ -39,7 +39,7 @@ class APIFootballExtended (APIFootballBase):
         league = league if league is not None else self.league
         season = season if season is not None else self.season
 
-        rounds = list(self.round(league=league, season=season))
+        rounds = self.round(league=league, season=season).rounds.to_list()
         current_round = self.get_current_round(league=league, season=season)
 
         icr_ = rounds.index(current_round)
@@ -79,3 +79,4 @@ class APIFootballExtended (APIFootballBase):
         predictions = [self.predictions(fixture=fixture) for fixture in fixtures]
         res = pd.concat(predictions, axis=0).set_index(fixtures)
         return res
+
